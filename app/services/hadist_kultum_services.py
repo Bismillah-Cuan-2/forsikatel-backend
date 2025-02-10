@@ -26,6 +26,7 @@ class HadistKultumServices:
             except Exception as e:
                 return jsonify(Error.messages(e)), 500
     
+    @staticmethod
     def load_hadist_kultum_from_excel(data):
         with Session() as session:
             try:
