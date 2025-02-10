@@ -11,14 +11,14 @@ class HadistKultum(Base):
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=None, onupdate=datetime.now(timezone.utc), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
-    display_date = Column(DateTime, default=None, nullable=True)
+    day = Column(Integer, nullable=False)
 
     def to_dict(self):
         return {
             "id": self.id,
             "hadist": self.hadist,
             "kultum": self.kultum,
-            "display_date": self.display_date,
+            "day": self.day,
             "metadata": {
                 "created_at": self.created_at,
                 "updated_at": self.updated_at,
