@@ -26,16 +26,26 @@ class HadistKultumServices:
         with Session() as session:
             try:
                 df = pd.read_excel(file_path)
+
+                required_columns = {"hadist", "kultum", "day"}
+                if not required_columns.issubset(df.columns):
+                    return jsonify({"error": "Missing required columns in Excel"}), 400
+
                 for _, row in df.iterrows():
+                    # Pastikan nilai "day" adalah angka antara 1-31
+                    if not (1 <= int(row["day"]) <= 31):
+                        continue  # Skip jika day tidak valid
+
                     new_hadist_kultum = HadistKultum(
                         hadist=row["hadist"],
-                        kultum=row["kultum"], #tambah kolom tanggal aja gausah bulan tahun nya (display date)\
-                        day=row["day"]
+                        kultum=row["kultum"],
+                        day=int(row["day"])
                     )
                     session.add(new_hadist_kultum)
-                
+
                 session.commit()
                 return jsonify({"message": HadistKultumMessages.SUCCESS_LOAD_HADIST_KULTUM}), 201
+
             except Exception as e:
                 session.rollback()
                 return jsonify(Error.messages(e)), 400
