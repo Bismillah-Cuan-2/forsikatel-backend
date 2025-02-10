@@ -13,7 +13,7 @@ class HadistKultumServices:
             try:
                 today = datetime.now(timezone.utc).day
                 hadist_kultum = session.query(HadistKultum).filter(
-                    HadistKultum.display_date == today, HadistKultum.is_deleted == False).first()
+                    HadistKultum.day == today_day, HadistKultum.is_deleted == False).first()
                 
                 return jsonify({
                     "message": "...",
@@ -29,7 +29,8 @@ class HadistKultumServices:
                 for _, row in df.iterrows():
                     new_hadist_kultum = HadistKultum(
                         hadist=row["hadist"],
-                        kultum=row["kultum"] #tambah kolom tanggal aja gausah bulan tahun nya (display date)
+                        kultum=row["kultum"], #tambah kolom tanggal aja gausah bulan tahun nya (display date)\
+                        day=row["day"]
                     )
                     session.add(new_hadist_kultum)
                 
