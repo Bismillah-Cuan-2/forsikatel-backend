@@ -32,8 +32,8 @@ def create_app(test_config=None, production_config=os.getenv("PRODUCTION_CONFIG"
     def handle_options():
         if request.method == 'OPTIONS':
             return '', 204
-    from app.routes import hadist_kultum_bp
+    from app.routes import hadist_kultum
 
-    app.register_blueprint(hadist_kultum_bp, url_prefix="/api/v1/hadist-kultum")
+    app.register_blueprint(hadist_kultum, url_prefix="/api/v1/hadist-kultum")
 
     return app

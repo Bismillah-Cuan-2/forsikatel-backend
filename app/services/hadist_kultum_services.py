@@ -5,13 +5,17 @@ from app.models.hadist_kultum_model import HadistKultum
 from app.constant.messages.error import Error
 from app.constant.messages.hadist_kultum import HadistKultumMessages
 import pandas as pd
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class HadistKultumServices:
     @staticmethod
     def get_daily_hadist():
         with Session() as session:
             try:
-                today = datetime.now(timezone.utc).day
+                utc_now = datetime.now(ZoneInfo("UTC"))
+                wib_now = utc_now.astimezone(ZoneInfo("Asia/Jakarta"))
+                today = wib_now.day
                 hadist_kultum = session.query(HadistKultum).filter(
                     HadistKultum.day == today, HadistKultum.is_deleted == False).first()
                 
@@ -22,10 +26,10 @@ class HadistKultumServices:
             except Exception as e:
                 return jsonify(Error.messages(e)), 500
     
-    def load_hadist_kultum_from_excel(file_path):
+    def load_hadist_kultum_from_excel(data):
         with Session() as session:
             try:
-                df = pd.read_excel(file_path)
+                df = pd.read_excel(data["path_file"])
 
                 required_columns = {"hadist", "kultum", "day"}
                 if not required_columns.issubset(df.columns):
