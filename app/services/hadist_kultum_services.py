@@ -29,7 +29,7 @@ class HadistKultumServices:
 
                 required_columns = {"hadist", "kultum", "day"}
                 if not required_columns.issubset(df.columns):
-                    return jsonify({"error": "Missing required columns in Excel"}), 400
+                    return jsonify({"error": HadistKultumMessages.MISSING_DATA}), 400
 
                 for _, row in df.iterrows():
                     # Pastikan nilai "day" adalah angka antara 1-31
