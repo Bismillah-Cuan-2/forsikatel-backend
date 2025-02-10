@@ -13,7 +13,7 @@ class HadistKultumServices:
             try:
                 today = datetime.now(timezone.utc).day
                 hadist_kultum = session.query(HadistKultum).filter(
-                    HadistKultum.day == today_day, HadistKultum.is_deleted == False).first()
+                    HadistKultum.day == today, HadistKultum.is_deleted == False).first()
                 
                 return jsonify({
                     "message": "...",
