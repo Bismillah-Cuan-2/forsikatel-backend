@@ -16,7 +16,7 @@ class HadistKultumServices:
                     HadistKultum.day == today, HadistKultum.is_deleted == False).first()
                 
                 return jsonify({
-                    "message": "...",
+                    "message": HadistKultumMessages.SUCCESS_GET_HADIST_KULTUM,
                     "hadist_kultum": hadist_kultum.to_dict() if hadist_kultum else {}
                 })
             except Exception as e:
@@ -35,7 +35,7 @@ class HadistKultumServices:
                     session.add(new_hadist_kultum)
                 
                 session.commit()
-                return jsonify({"message": "..."}), 201
+                return jsonify({"message": HadistKultumMessages.SUCCESS_LOAD_HADIST_KULTUM}), 201
             except Exception as e:
                 session.rollback()
                 return jsonify(Error.messages(e)), 400
