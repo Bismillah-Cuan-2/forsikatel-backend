@@ -16,11 +16,11 @@ class Users:
     updated_at = Column(DateTime, default=None, onupdate=datetime.now(timezone.utc), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
     
-    def set_phone_number(self, phone_number):
-        self.hashed_phone_number = generate_password_hash(phone_number)
+    def set_phone_number(self, var_phone_number):
+        self.phone_number = generate_password_hash(var_phone_number)
 
-    def check_phone_number(self, phone_number):
-        return check_password_hash(self.hashed_phone_number, phone_number)
+    def check_phone_number(self, var_phone_number):
+        return check_password_hash(self.phone_number, var_phone_number)
     
     def to_dict(self):
         return {
