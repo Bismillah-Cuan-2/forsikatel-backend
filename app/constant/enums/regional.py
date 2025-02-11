@@ -1,4 +1,6 @@
-class RegionalEnums:
+from enum import Enum
+
+class RegionalEnums(str, Enum):
     HEAD_OFFICE = "ho"
     R1_SUMATERA = "r1_sumatera"
     R2_JAKARTA = "r2_jakarta"
