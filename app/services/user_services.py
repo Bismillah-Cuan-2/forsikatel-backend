@@ -52,7 +52,7 @@ class UsersService:
                 if user_check is None:
                     return jsonify({"msg": UserMessages.NAME_NOT_EXIST}), 404
                 
-                if user_check.check_password(data["phone_number"]):
+                if user_check.check_phone_number(data["phone_number"]):
                     payload = {
                         "user_id": user_check.id,
                         "name_husband": user_check.name_husband,
