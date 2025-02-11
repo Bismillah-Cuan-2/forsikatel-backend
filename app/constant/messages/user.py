@@ -1,0 +1,9 @@
+class UserMessages:
+    NAME_ALREADY_EXIST = "name already exist"
+    INCORRECT_PHONE_NUMBER = "incorrect phone number"
+    NAME_NOT_EXIST = "name not exist"
+    USER_ID_NOT_FOUND = "user id not found"
+    LOGIN_SUCCESS = "login successfully"
+    SUCCESS_USER_REGISTER = "success register user"
+    SUCCESS_CHANGE_PASSWORD = "success change password"
+    SUCCESS_DELETE_USER = "success delete user"

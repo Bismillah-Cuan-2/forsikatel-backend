@@ -32,5 +32,10 @@ def create_app(test_config=None, production_config=os.getenv("PRODUCTION_CONFIG"
     def handle_options():
         if request.method == 'OPTIONS':
             return '', 204
+        
+    from app.routes import users, seeds
+    
+    app.register_blueprint(seeds, url_prefix="/api/v1/seeds")
+    app.register_blueprint(users, url_prefix="/api/v1/users")
     
     return app
