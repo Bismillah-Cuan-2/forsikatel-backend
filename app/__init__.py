@@ -26,7 +26,7 @@ def create_app(test_config=None, production_config=os.getenv("PRODUCTION_CONFIG"
     
     @app.route("/")
     def index():
-        return redirect("https://documenter.getpostman.com/view/31842216/2sAYBRGa1z")
+        return redirect("https://www.postman.com/cuan33/workspace/cuan-2/collection/39870388-003398ac-ac89-4657-ac62-8c7bd46c219b?action=share&creator=39870388&active-environment=39870388-48f83279-5741-4408-8153-a3ccf31ffb59")
     
     @app.before_request
     def handle_options():
