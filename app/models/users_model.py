@@ -25,7 +25,7 @@ class Users:
     def to_dict(self):
         return {
             "id": self.id,
-            "full_name": self.full_name,
+            "full_name": self.name_husband,
             "phone_number": self.phone_number,
             "regional": self.regional,
             "metadata": {
