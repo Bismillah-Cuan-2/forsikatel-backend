@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from app.constant.enums.regional import RegionalEnums
 
-class Users:
+class Users(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, nullable=False)
