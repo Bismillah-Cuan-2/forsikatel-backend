@@ -22,10 +22,12 @@ class Users(Base):
     def check_phone_number(self, var_phone_number):
         return check_password_hash(self.phone_number, var_phone_number)
     
+    data = relationship("Data", back_populates="users")
+    
     def to_dict(self):
         return {
             "id": self.id,
-            "full_name": self.name_husband,
+            "name_husband": self.name_husband,
             "phone_number": self.phone_number,
             "regional": self.regional,
             "metadata": {
