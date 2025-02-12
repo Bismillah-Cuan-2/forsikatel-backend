@@ -125,3 +125,18 @@ class Dataservices:
 
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+    @staticmethod
+    def all_storage(payload):
+        _ = payload
+        riwayat = Dataservices.get_riwayat_setoran(payload["user_id"])
+        total_progress = Dataservices.get_total_progress(payload["user_id"])
+        progress_chart = Dataservices.get_progress_chart(payload["user_id"])
+        return jsonify({
+            "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
+            "data": {
+                "history": riwayat,
+                "total_progress": total_progress,
+                "progress_chart": progress_chart
+            }
+        }), 200
