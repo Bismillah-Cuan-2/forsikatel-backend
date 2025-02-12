@@ -1,4 +1,4 @@
-class SetorNgajiMessages:
+class SetoranNgajiMessages:
     SUCCESS_ADD_SETOR_NGAJI_DATA = "success add setor ngaji data"
     SETOR_NGAJI_ALREADY_EXIST = "setor ngaji already exist"
     CLEAR_SETOR_NGAJI_DATA = "success clear setor ngaji data"
