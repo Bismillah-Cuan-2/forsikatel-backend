@@ -7,6 +7,6 @@ class SetoranNgajiMessages:
     MISSING_DATA = "missing data"
     SUCCESS_RIWAYAT_SETOR_NGAJI = "success riwayat setor ngaji"
     SUCCESS_PROGRESS_CHART = "success add progress chart"
-    SUCCESS_ADD_ALL_STORAGE = "success add all storages"
+    SUCCESS_ADD_STORAGE = "success add all storages"
     SUCCESS_UPDATE_SETOR_NGAJI_DATA = "success update setor ngaji data"
     SUCCESS_DELETE_SETOR_NGAJI_DATA = "success delete setor ngaji data"
