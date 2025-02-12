@@ -2,6 +2,8 @@ from app.models.users_model import Users
 from app.seeds.user_seeds import user_seeds
 from app.models.data_model import Data
 from app.seeds.setoran_seeds import setoran_seed
+from app.models.hadist_kultum_model import HadistKultum
+from app.seeds.hadist_seeds import hadist_seeds
 seed_configs = {
         "users": {
             "model": Users,
@@ -21,5 +23,15 @@ seed_configs = {
                 last_juz = setoran_seed["last_juz"],
                 total_khatam = setoran_seed["total_khatam"],
             ) 
-        }
+        },
+        "hadist": {
+            "model": HadistKultum,
+            "data": hadist_seeds,
+            "fields": ["hadist", "kultum", "day"],
+            "process_function": lambda session, hadist_seeds:HadistKultum(
+                hadist = hadist_seeds["hadist"],    
+                kultum = hadist_seeds["kultum"],
+                day = hadist_seeds["day"]
+            ) 
+        },
     }
