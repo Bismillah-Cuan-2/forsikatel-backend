@@ -12,4 +12,5 @@ users.add_url_rule("/login", view_func=UsersController.login_user, methods=["POS
 users.add_url_rule("/delete", view_func=UsersController.delete_user, methods=["DELETE"])
 
 hadist_kultum = Blueprint("hadist_kultum", __name__)
-hadist_kultum.add_url_rule("/", view_func=HadistKultumControllers.get_daily_hadist, methods=["GET", "POST"])
+hadist_kultum.add_url_rule("/", view_func=HadistKultumControllers.get_daily_hadist, methods=["GET"])
+hadist_kultum.add_url_rule("/load", view_func=HadistKultumControllers.load_hadist_kultum_from_excel, methods=["POST"])
