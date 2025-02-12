@@ -11,6 +11,8 @@ class HadistKultum(Base):
     updated_at = Column(DateTime, default=None, onupdate=datetime.now(timezone.utc), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
     day = Column(Integer, nullable=False)
+    title = Column(String(255), nullable=False)
+    channel = Column(String(255), nullable=False)
 
     def to_dict(self):
         return {
@@ -18,6 +20,8 @@ class HadistKultum(Base):
             "hadist": self.hadist,
             "kultum": self.kultum,
             "day": self.day,
+            "tittle": self.title,
+            "channel": self.channel,
             "metadata": {
                 "created_at": self.created_at,
                 "updated_at": self.updated_at,
