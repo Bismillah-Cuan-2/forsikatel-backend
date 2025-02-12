@@ -33,10 +33,11 @@ def create_app(test_config=None, production_config=os.getenv("PRODUCTION_CONFIG"
         if request.method == 'OPTIONS':
             return '', 204
           
-    from app.routes import hadist_kultum, seeds, users
+    from app.routes import hadist_kultum, seeds, users, setoran_ngaji
 
     app.register_blueprint(hadist_kultum, url_prefix="/api/v1/hadist-kultum")
     app.register_blueprint(seeds, url_prefix="/api/v1/seeds")
     app.register_blueprint(users, url_prefix="/api/v1/users")
+    app.register_blueprint(setoran_ngaji, url_prefix="/api/v1/setoran-ngaji")
     
     return app

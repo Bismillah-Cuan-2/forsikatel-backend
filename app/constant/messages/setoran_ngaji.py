@@ -1,0 +1,12 @@
+class SetoranNgajiMessages:
+    SUCCESS_ADD_SETOR_NGAJI_DATA = "success add setor ngaji data"
+    SETOR_NGAJI_ALREADY_EXIST = "setor ngaji already exist"
+    CLEAR_SETOR_NGAJI_DATA = "success clear setor ngaji data"
+    SUCCESS_SHOW_ALL_SETOR_NGAJI = "success show all setor ngaji data"
+    SETORAN_NOT_FOUND = "setoran ngaji not found"
+    MISSING_DATA = "missing data"
+    SUCCESS_RIWAYAT_SETOR_NGAJI = "success riwayat setor ngaji"
+    SUCCESS_PROGRESS_CHART = "success add progress chart"
+    SUCCESS_ADD_STORAGE = "success add all storages"
+    SUCCESS_UPDATE_SETOR_NGAJI_DATA = "success update setor ngaji data"
+    SUCCESS_DELETE_SETOR_NGAJI_DATA = "success delete setor ngaji data"

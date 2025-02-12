@@ -15,7 +15,7 @@ class Data(Base):
     updated_at = Column(DateTime, default=None, onupdate=datetime.now(timezone.utc), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
     
-    user = relationship("Users", back_populates="data")
+    users = relationship("Users", back_populates="data")
     
     def to_dict(self):
         return {
