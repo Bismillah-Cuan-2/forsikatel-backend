@@ -32,7 +32,6 @@ class UsersController:
         
         if "payload" in response:
             payload = response["payload"]
-            print(payload)
             access_token = create_access_token(identity=f"{payload}")
             refresh_token = create_refresh_token(identity=f"{payload}")
             
