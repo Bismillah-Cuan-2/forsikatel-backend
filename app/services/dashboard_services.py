@@ -22,6 +22,7 @@ class DashboardServices:
                 
                 return last_juz[0] if last_juz else None  # Ambil hanya nilainya
             except Exception as e:
+                session.rollback()
                 return Error.messages(e)
             
     @staticmethod
@@ -46,6 +47,7 @@ class DashboardServices:
                 return kalender
 
             except Exception as e:
+                session.rollback()
                 return Error.messages(e)
             
     @staticmethod
@@ -60,6 +62,7 @@ class DashboardServices:
                 
                 return hadits.hadist if hadits else None
             except Exception as e:
+                session.rollback()
                 return Error.messages(e)
             
     @staticmethod
@@ -99,6 +102,7 @@ class DashboardServices:
                 
                 return result
             except Exception as e:
+                session.rollback()
                 return Error.messages(e)
             
     @staticmethod
@@ -123,25 +127,31 @@ class DashboardServices:
 
                 return [{"region": region, "total_juz": total} for region, total in top_regions]
             except Exception as e:
+                session.rollback()
                 return Error.messages(e)
             
     @staticmethod
     def today_report_region():
-        today = datetime.now(timezone.utc).date()
         try:
+            today = datetime.now(timezone.utc).date()
             with Session() as session:
                 result = (
                     session.query(
-                        Users.regional, func.count(Data.id).label("total_entries")
+                        Users.regional, func.count(func.distinct(Data.user_id)).label("total_users_setor")
                     )
                     .join(Users, Users.id == Data.user_id)
                     .filter(cast(Data.created_at, Date) == today)
                     .group_by(Users.regional)
                     .all()
                 )
-            
-            return [{"region": region, "total_entries": total} for region, total in result]
+                
+                # Hitung total pengguna per region
+                total_users_per_region = dict(
+                    session.query(Users.regional, func.count(Users.id)).group_by(Users.regional).all()
+                )
+            return [{"region": region, "total_users_setor": total, "total_users_region": total_users_per_region.get(region, 0)} for region, total in result]
         except Exception as e:
+            session.rollback()
             return Error.messages(e)
         
     @staticmethod

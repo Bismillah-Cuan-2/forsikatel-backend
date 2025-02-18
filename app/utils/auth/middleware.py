@@ -16,7 +16,7 @@ def user_required():
             with Session() as session:
                 user = session.query(Users).filter_by(name_husband = payload["name_husband"])
                 if user is None:
-                    return jsonify({"msg": UserMessages.USERNAME_NOT_EXIST}), 404
+                    return jsonify({"msg": UserMessages.NAME_NOT_EXIST}), 404
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
