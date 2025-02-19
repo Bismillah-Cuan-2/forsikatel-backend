@@ -20,7 +20,7 @@ class HadistKultum(Base):
             "hadist": self.hadist,
             "kultum": self.kultum,
             "day": self.day,
-            "tittle": self.title,
+            "title": self.title,
             "channel": self.channel,
             "metadata": {
                 "created_at": self.created_at,
