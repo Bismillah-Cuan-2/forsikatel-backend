@@ -143,8 +143,6 @@ class Dataservices:
         total_progress = Dataservices.get_total_progress(user_id)
         return jsonify({
             "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
-            "data": {
-                "history": riwayat,
-                "total_progress": total_progress
-            }
+            "history": riwayat,
+            "total_progress": total_progress
         }), 200
