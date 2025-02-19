@@ -20,6 +20,7 @@ hadist_kultum.add_url_rule("/load", view_func=HadistKultumControllers.load_hadis
 
 setoran_ngaji = Blueprint("setoran_ngaji", __name__)
 setoran_ngaji.add_url_rule("/", view_func=SetoranNgajiControllers.setoran_ngaji_controllers, methods=["GET", "POST"])
+setoran_ngaji.add_url_rule("/chart_ngaji", view_func=SetoranNgajiControllers.progress_chart_controllers, methods=["GET"])
 
 dashboard = Blueprint("dashboard", __name__)
 dashboard.add_url_rule("/", view_func=DashboardControllers.get_dashboard_data, methods=["GET"])

@@ -70,46 +70,75 @@ class Dataservices:
                 last_juz = session.query(Data.last_juz).filter(
                     Data.user_id == user_id, Data.is_deleted == False
                 ).order_by(Data.created_at.desc()).first()
-
-                
-                today = datetime.today()
-                last_week = today - timedelta(days=7)
-                prev_week_start = last_week - timedelta(days=7)
-
-                recent_data = session.query(
-                    func.date(Data.created_at), func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    Data.created_at >= last_week,
-                    Data.is_deleted == False
-                ).group_by(func.date(Data.created_at)).all()
-
-                prev_data = session.query(
-                    func.date(Data.created_at), func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    Data.created_at >= prev_week_start,
-                    Data.created_at < last_week,
-                    Data.is_deleted == False
-                ).group_by(func.date(Data.created_at)).all()
-
                 return jsonify({
-                    "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
-                    "history": result,
-                    "total_progress": {
-                        "total_juz": total_juz,
-                        "last_juz": last_juz[0] if last_juz else 0,
-                        "total_khatam": total_khatam
-                    },
-                    "progress_chart": {
-                        "msg": SetoranNgajiMessages.SUCCESS_PROGRESS_CHART,
-                        "data": {
-                            "last_7_days": {str(date): juz for date, juz in recent_data},
-                            "prev_week": {str(date): juz for date, juz in prev_data}
-                        }
+                    "total_juz": total_juz,
+                    "last_juz": last_juz[0] if last_juz else 0,
+                    "total_khatam": total_khatam
+                }), 200
+
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_progress_chart(user_id):
+        with Session() as session:
+            try:
+                today = datetime.today().date()
+                last_week = today - timedelta(days=7)
+
+                day_name_id = today.strftime("%A")  
+                days_translation = {
+                    "Monday": "Senin",
+                    "Tuesday": "Selasa",
+                    "Wednesday": "Rabu",
+                    "Thursday": "Kamis",
+                    "Friday": "Jumat",
+                    "Saturday": "Sabtu",
+                    "Sunday": "Minggu"
+                }
+                day_name = days_translation.get(day_name_id, day_name_id)
+                
+                # 🔹 Data 7 hari terakhir
+                today_data = session.query(
+                    func.sum(Data.juz_read)
+                ).filter(
+                    Data.user_id == user_id,
+                    func.date(Data.created_at) == today,
+                    Data.is_deleted == False
+                ).scalar()
+
+                # 🔹 Data minggu sebelumnya
+                prev_week_data = session.query(
+                    func.sum(Data.juz_read)
+                ).filter(
+                    Data.user_id == user_id,
+                    func.date(Data.created_at) == last_week,
+                    Data.is_deleted == False
+                ).scalar()
+
+                today_data = today_data if today_data else 0
+                prev_week_data = prev_week_data if prev_week_data else 0
+                return jsonify({
+                    "msg": SetoranNgajiMessages.SUCCESS_PROGRESS_CHART,
+                    "data": {
+                        "day": day_name,
+                        "today": today_data,  
+                        "prev week": prev_week_data 
                     }
                 }), 200
 
             except Exception as e:
-                session.rollback()
-                return jsonify(Error.messages(e)), 400
+                return jsonify({"error": str(e)}), 500
+            
+    @staticmethod
+    def all_storage(payload):
+        _ = payload
+        riwayat = Dataservices.get_riwayat_setoran(payload["user_id"])
+        total_progress = Dataservices.get_total_progress(payload["user_id"])
+        return jsonify({
+            "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
+            "data": {
+                "history": riwayat,
+                "total_progress": total_progress
+            }
+        }), 200
