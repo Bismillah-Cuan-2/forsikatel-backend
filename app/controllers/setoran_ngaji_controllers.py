@@ -27,5 +27,5 @@ class SetoranNgajiControllers:
         user_id = int(payload["user_id"])
 
         if request.method == "GET":
-            response = Dataservices.get_riwayat_setoran(user_id)
+            response = Dataservices.get_progress_chart(user_id)
         return response
