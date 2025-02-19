@@ -54,7 +54,7 @@ class Dataservices:
                 result = []
                 for setoran in setoran_list:
                     result.append({
-                        "tanggal": setoran.created_at.strftime("%d %b %Y"),
+                        "tanggal": setoran.created_at,
                         "banyak_juz_dibaca": setoran.juz_read,
                         "juz_terakhir": setoran.last_juz,
                         "total_khatam": f"{setoran.total_khatam}x"
@@ -62,6 +62,7 @@ class Dataservices:
 
                 return result
             except Exception as e:
+                session.rollback()
                 return Error.messages(e), 400
             
     @staticmethod
@@ -84,6 +85,7 @@ class Dataservices:
                 }
 
             except Exception as e:
+                session.rollback()
                 return Error.messages(e), 400
 
     @staticmethod
@@ -135,6 +137,7 @@ class Dataservices:
                 }), 200
 
             except Exception as e:
+                session.rollback()
                 return jsonify(Error.messages(e)), 400
             
     @staticmethod
