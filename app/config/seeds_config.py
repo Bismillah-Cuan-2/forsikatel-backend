@@ -32,7 +32,7 @@ seed_configs = {
                 hadist = hadist_seeds["hadist"],
                 kultum = hadist_seeds["kultum"],
                 day = hadist_seeds["day"],
-                title = hadist_seeds["tittle"],
+                title = hadist_seeds["title"],
                 channel = hadist_seeds["channel"]
             ) 
         },
