@@ -94,8 +94,7 @@ class Dataservices:
             try:
                 today = datetime.today().date()
                 last_week = today - timedelta(days=7)
-
-                day_name_id = today.strftime("%A")  
+                
                 days_translation = {
                     "Monday": "Senin",
                     "Tuesday": "Selasa",
@@ -105,40 +104,44 @@ class Dataservices:
                     "Saturday": "Sabtu",
                     "Sunday": "Minggu"
                 }
-                day_name = days_translation.get(day_name_id, day_name_id)
                 
-                # 🔹 Data 7 hari terakhir
-                today_data = session.query(
-                    func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    func.date(Data.created_at) == today,
-                    Data.is_deleted == False
-                ).scalar()
-
-                # 🔹 Data minggu sebelumnya
-                prev_week_data = session.query(
-                    func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    func.date(Data.created_at) == last_week,
-                    Data.is_deleted == False
-                ).scalar()
-
-                today_data = today_data if today_data else 0
-                prev_week_data = prev_week_data if prev_week_data else 0
+                week_data = []
+                for i in range(7):
+                    day = today - timedelta(days=i)
+                    prev_week_day = last_week - timedelta(days=i)
+                    day_name = days_translation.get(day.strftime("%A"), day.strftime("%A"))
+                    
+                    day_data = session.query(
+                        func.sum(Data.juz_read)
+                    ).filter(
+                        Data.user_id == user_id,
+                        func.date(Data.created_at) == day,
+                        Data.is_deleted == False
+                    ).scalar() or 0
+                    
+                    prev_week_data = session.query(
+                        func.sum(Data.juz_read)
+                    ).filter(
+                        Data.user_id == user_id,
+                        func.date(Data.created_at) == prev_week_day,
+                        Data.is_deleted == False
+                    ).scalar() or 0
+                    
+                    week_data.append({
+                        "day": day_name,
+                        "today": day_data,
+                        "prev_week": prev_week_data
+                    })
+                
                 return jsonify({
                     "msg": SetoranNgajiMessages.SUCCESS_PROGRESS_CHART,
-                    "data": {
-                        "day": day_name,
-                        "today": today_data,  
-                        "prev week": prev_week_data 
-                    }
+                    "data": week_data
                 }), 200
 
             except Exception as e:
                 session.rollback()
                 return jsonify(Error.messages(e)), 400
+
             
     @staticmethod
     def all_storage(user_id):
