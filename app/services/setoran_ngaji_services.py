@@ -27,21 +27,22 @@ class Dataservices:
                     user_id=user_id,
                     juz_read=juz_read,
                     last_juz=last_juz,
-                    total_khatam=total_khatam,
-                    created_at=datetime.datetime.utcnow()
+                    total_khatam=total_khatam
                 )
 
                 session.add(setoran)
                 session.commit()
                 
-                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_ADD_SETOR_NGAJI_DATA}), 201
+                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_ADD_SETOR_NGAJI_DATA,
+                                "new_setoran": setoran.to_dict()}), 201
             
             except Exception as e:
                 session.rollback()
-        return jsonify({"error": str(e)}), 500
+                return jsonify(Error.messages(e)), 400
 
     @staticmethod
-    def get_riwayat_setoran(user_id):
+    @staticmethod
+    def all_storage(user_id):
         with Session() as session:
             try:
                 setoran_list = session.query(Data).filter(
@@ -60,15 +61,6 @@ class Dataservices:
                         "total_khatam": f"{setoran.total_khatam}x"
                     })
 
-                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_RIWAYAT_SETOR_NGAJI, "data": result}), 200
-
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-
-    @staticmethod
-    def get_total_progress(user_id):
-        with Session() as session:
-            try:
                 total_juz = session.query(func.sum(Data.juz_read)).filter(
                     Data.user_id == user_id, Data.is_deleted == False
                 ).scalar() or 0
@@ -78,7 +70,6 @@ class Dataservices:
                 last_juz = session.query(Data.last_juz).filter(
                     Data.user_id == user_id, Data.is_deleted == False
                 ).order_by(Data.created_at.desc()).first()
-
                 return jsonify({
                     "total_juz": total_juz,
                     "last_juz": last_juz[0] if last_juz else 0,
@@ -106,7 +97,7 @@ class Dataservices:
                     "Sunday": "Minggu"
                 }
                 day_name = days_translation.get(day_name_id, day_name_id)
-
+                
                 # 🔹 Data 7 hari terakhir
                 today_data = session.query(
                     func.sum(Data.juz_read)

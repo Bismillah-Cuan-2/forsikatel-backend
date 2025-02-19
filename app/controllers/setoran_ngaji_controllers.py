@@ -10,8 +10,6 @@ class SetoranNgajiControllers:
     def setoran_ngaji_controllers():
         payload = json.dumps(ast.literal_eval(get_jwt_identity()))
         user_id = int(payload["user_id"])
-        # payload = json.loads(identity)
-        # print(identity)
         payload = json.loads(payload)
         
         if request.method == "POST":
