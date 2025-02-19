@@ -106,10 +106,11 @@ class Dataservices:
                 }
                 
                 week_data = []
-                for i in range(7):
-                    day = today - timedelta(days=i)
-                    prev_week_day = last_week - timedelta(days=i)
-                    day_name = days_translation.get(day.strftime("%A"), day.strftime("%A"))
+                ordered_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+                
+                for day_name in ordered_days:
+                    day = today - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
+                    prev_week_day = last_week - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
                     
                     day_data = session.query(
                         func.sum(Data.juz_read)
