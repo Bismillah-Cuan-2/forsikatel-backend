@@ -5,8 +5,6 @@ from app.utils.functions.search_normalizer import normalize_data
 from app.models.users_model import Users
 from app.constant.messages.user import UserMessages
 from app.constant.messages.error import Error
-from app.utils.validators.login_validator import LoginValidator
-from app.utils.validators.register_validator import RegisterValidator
 
 class UsersService:
     @staticmethod

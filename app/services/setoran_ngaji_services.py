@@ -27,18 +27,18 @@ class Dataservices:
                     user_id=user_id,
                     juz_read=juz_read,
                     last_juz=last_juz,
-                    total_khatam=total_khatam,
-                    created_at=datetime.datetime.utcnow()
+                    total_khatam=total_khatam
                 )
 
                 session.add(setoran)
                 session.commit()
                 
-                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_ADD_SETOR_NGAJI_DATA}), 201
+                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_ADD_SETOR_NGAJI_DATA,
+                                "new_setoran": setoran.to_dict()}), 201
             
             except Exception as e:
                 session.rollback()
-        return jsonify({"error": str(e)}), 500
+                return jsonify(Error.messages(e)), 400
 
     @staticmethod
     def get_riwayat_setoran(user_id):
@@ -54,17 +54,17 @@ class Dataservices:
                 result = []
                 for setoran in setoran_list:
                     result.append({
-                        "tanggal": setoran.created_at.strftime("%d %b %Y"),
+                        "tanggal": setoran.created_at,
                         "banyak_juz_dibaca": setoran.juz_read,
                         "juz_terakhir": setoran.last_juz,
                         "total_khatam": f"{setoran.total_khatam}x"
                     })
 
-                return jsonify({"msg": SetoranNgajiMessages.SUCCESS_RIWAYAT_SETOR_NGAJI, "data": result}), 200
-
+                return result
             except Exception as e:
-                return jsonify({"error": str(e)}), 500
-
+                session.rollback()
+                return Error.messages(e), 400
+            
     @staticmethod
     def get_total_progress(user_id):
         with Session() as session:
@@ -78,65 +78,78 @@ class Dataservices:
                 last_juz = session.query(Data.last_juz).filter(
                     Data.user_id == user_id, Data.is_deleted == False
                 ).order_by(Data.created_at.desc()).first()
-
-                return jsonify({
+                return {
                     "total_juz": total_juz,
                     "last_juz": last_juz[0] if last_juz else 0,
                     "total_khatam": total_khatam
-                }), 200
+                }
 
             except Exception as e:
-                return jsonify({"error": str(e)}), 500
+                session.rollback()
+                return Error.messages(e), 400
 
     @staticmethod
     def get_progress_chart(user_id):
         with Session() as session:
             try:
-                today = datetime.today()
+                today = datetime.today().date()
                 last_week = today - timedelta(days=7)
-                prev_week_start = last_week - timedelta(days=7)
-
-                # 🔹 Data 7 hari terakhir
-                recent_data = session.query(
-                    func.date(Data.created_at), func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    Data.created_at >= last_week,
-                    Data.is_deleted == False
-                ).group_by(func.date(Data.created_at)).all()
-
-                # 🔹 Data minggu sebelumnya
-                prev_data = session.query(
-                    func.date(Data.created_at), func.sum(Data.juz_read)
-                ).filter(
-                    Data.user_id == user_id,
-                    Data.created_at >= prev_week_start,
-                    Data.created_at < last_week,
-                    Data.is_deleted == False
-                ).group_by(func.date(Data.created_at)).all()
-
+                
+                days_translation = {
+                    "Monday": "Senin",
+                    "Tuesday": "Selasa",
+                    "Wednesday": "Rabu",
+                    "Thursday": "Kamis",
+                    "Friday": "Jumat",
+                    "Saturday": "Sabtu",
+                    "Sunday": "Minggu"
+                }
+                
+                week_data = []
+                ordered_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+                
+                for day_name in ordered_days:
+                    day = today - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
+                    prev_week_day = last_week - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
+                    
+                    day_data = session.query(
+                        func.sum(Data.juz_read)
+                    ).filter(
+                        Data.user_id == user_id,
+                        func.date(Data.created_at) == day,
+                        Data.is_deleted == False
+                    ).scalar() or 0
+                    
+                    prev_week_data = session.query(
+                        func.sum(Data.juz_read)
+                    ).filter(
+                        Data.user_id == user_id,
+                        func.date(Data.created_at) == prev_week_day,
+                        Data.is_deleted == False
+                    ).scalar() or 0
+                    
+                    week_data.append({
+                        "day": day_name,
+                        "today": day_data,
+                        "prev_week": prev_week_data
+                    })
+                
                 return jsonify({
                     "msg": SetoranNgajiMessages.SUCCESS_PROGRESS_CHART,
-                    "data": {
-                        "last_7_days": {str(date): juz for date, juz in recent_data},
-                        "prev_week": {str(date): juz for date, juz in prev_data}
-                    }
+                    "data": week_data
                 }), 200
 
             except Exception as e:
-                return jsonify({"error": str(e)}), 500
+                session.rollback()
+                return jsonify(Error.messages(e)), 400
+
             
     @staticmethod
-    def all_storage(payload):
-        _ = payload
-        riwayat = Dataservices.get_riwayat_setoran(payload["user_id"])
-        total_progress = Dataservices.get_total_progress(payload["user_id"])
-        progress_chart = Dataservices.get_progress_chart(payload["user_id"])
+    def all_storage(user_id):
+        riwayat = Dataservices.get_riwayat_setoran(user_id)
+        total_progress = Dataservices.get_total_progress(user_id)
         return jsonify({
             "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
-            "data": {
-                "history": riwayat,
-                "total_progress": total_progress,
-                "progress_chart": progress_chart
-            }
+            "history": riwayat,
+            "total_progress": total_progress
         }), 200

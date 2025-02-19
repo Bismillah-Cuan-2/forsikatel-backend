@@ -3,6 +3,8 @@ from app.controllers.hadist_kultum_controllers import HadistKultumControllers
 from app.controllers.user_controllers import UsersController
 from app.controllers.seeds_controllers import seeds_controller
 from app.controllers.setoran_ngaji_controllers import SetoranNgajiControllers
+from app.controllers.dashboard_controllers import DashboardControllers
+from app.controllers.progress_controllers import ProgressControllers
 
 seeds = Blueprint("seeds", __name__)
 seeds.add_url_rule("/", view_func=seeds_controller, methods=["GET", "POST", "DELETE"])
@@ -18,3 +20,10 @@ hadist_kultum.add_url_rule("/load", view_func=HadistKultumControllers.load_hadis
 
 setoran_ngaji = Blueprint("setoran_ngaji", __name__)
 setoran_ngaji.add_url_rule("/", view_func=SetoranNgajiControllers.setoran_ngaji_controllers, methods=["GET", "POST"])
+setoran_ngaji.add_url_rule("/chart_ngaji", view_func=SetoranNgajiControllers.progress_chart_controllers, methods=["GET"])
+
+dashboard = Blueprint("dashboard", __name__)
+dashboard.add_url_rule("/", view_func=DashboardControllers.get_dashboard_data, methods=["GET"])
+
+progress = Blueprint("progress", __name__)
+progress.add_url_rule("/", view_func=ProgressControllers.get_progress_data, methods=["GET"])
