@@ -9,8 +9,8 @@ class SetoranNgajiControllers:
     @user_required()
     def setoran_ngaji_controllers():
         payload = json.dumps(ast.literal_eval(get_jwt_identity()))
-        user_id = int(payload["user_id"])
         payload = json.loads(payload)
+        user_id = int(payload["user_id"])
         
         if request.method == "POST":
             data = request.json
@@ -23,8 +23,8 @@ class SetoranNgajiControllers:
     @user_required()
     def progress_chart_controllers():
         payload = json.dumps(ast.literal_eval(get_jwt_identity()))
-        user_id = int(payload["user_id"])
         payload = json.loads(payload)
+        user_id = int(payload["user_id"])
 
         if request.method == "GET":
             response = Dataservices.get_riwayat_setoran(user_id)
