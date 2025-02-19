@@ -60,7 +60,7 @@ class Dataservices:
                         "total_khatam": f"{setoran.total_khatam}x"
                     })
 
-                return result, 200
+                return result
             except Exception as e:
                 return Error.messages(e), 400
             
@@ -81,7 +81,7 @@ class Dataservices:
                     "total_juz": total_juz,
                     "last_juz": last_juz[0] if last_juz else 0,
                     "total_khatam": total_khatam
-                }, 200
+                }
 
             except Exception as e:
                 return Error.messages(e), 400
