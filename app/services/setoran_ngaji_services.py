@@ -138,9 +138,9 @@ class Dataservices:
                 return jsonify(Error.messages(e)), 400
             
     @staticmethod
-    def all_storage(payload):
-        riwayat = Dataservices.get_riwayat_setoran(payload["user_id"])
-        total_progress = Dataservices.get_total_progress(payload["user_id"])
+    def all_storage(user_id):
+        riwayat = Dataservices.get_riwayat_setoran(user_id)
+        total_progress = Dataservices.get_total_progress(user_id)
         return jsonify({
             "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
             "data": {
