@@ -29,7 +29,7 @@ seed_configs = {
             "data": hadist_seeds,
             "fields": ["hadist", "kultum", "day", "title", "channel"],
             "process_function": lambda session, hadist_seeds:HadistKultum(
-                hadist = hadist_seeds["hadist"],    
+                hadist = hadist_seeds["hadist"],
                 kultum = hadist_seeds["kultum"],
                 day = hadist_seeds["day"],
                 title = hadist_seeds["tittle"],

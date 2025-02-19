@@ -155,6 +155,24 @@ class DashboardServices:
             return Error.messages(e)
         
     @staticmethod
+    def time_in_day():
+        try:
+            utc_now = datetime.now(ZoneInfo("UTC"))
+            wib_now = utc_now.astimezone(ZoneInfo("Asia/Jakarta"))
+            hour = wib_now.hour
+
+            if 4 <= hour < 10:
+                return "Pagi"
+            elif 10 <= hour < 15:
+                return "Siang"
+            elif 15 <= hour < 18:
+                return "Sore"
+            else:
+                return "Malam"
+        except Exception as e:
+            return Error.messages(e)
+        
+    @staticmethod
     def dashboard_data(payload):
         return jsonify({
             "last_juz": DashboardServices.get_last_juz(payload),
@@ -163,5 +181,6 @@ class DashboardServices:
             "latest_activity": DashboardServices.latest_activity(),
             "top_region": DashboardServices.top_region(),
             "today_report_region": DashboardServices.today_report_region(),
+            "time_in_day": DashboardServices.time_in_day(),
             "message": DashboardMessages.SUCCESS_GET_DASHBOARD_DATA
         })
