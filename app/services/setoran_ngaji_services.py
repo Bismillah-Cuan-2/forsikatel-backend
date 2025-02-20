@@ -80,7 +80,7 @@ class Dataservices:
                 ).order_by(Data.created_at.desc()).first()
                 return {
                     "total_juz": total_juz,
-                    "last_juz": last_juz[0] if last_juz else 0,
+                    "last_juz": last_juz,
                     "total_khatam": total_khatam
                 }
 
