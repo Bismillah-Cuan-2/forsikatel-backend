@@ -173,6 +173,27 @@ class DashboardServices:
             return Error.messages(e)
         
     @staticmethod
+    def get_name_husband(payload):
+        with Session() as session:
+            try:
+                name_husband = session.query(Users.name_husband).filter_by(id=payload["user_id"]).first()
+                
+                if name_husband:
+                    name_husband = name_husband[0]  # Ambil nilai dari tuple
+                    
+                    # Ambil hanya bagian sebelum tanda "-"
+                    name_husband = name_husband.split("-")[0].strip()
+
+                    # Ambil maksimal 2 kata pertama
+                    words = name_husband.split()
+                    name_husband = " ".join(words[:2])
+
+                return name_husband
+            except Exception as e:
+                session.rollback()
+                return Error.messages(e)
+        
+    @staticmethod
     def dashboard_data(payload):
         return jsonify({
             "last_juz": DashboardServices.get_last_juz(payload),
@@ -182,5 +203,6 @@ class DashboardServices:
             "top_region": DashboardServices.top_region(),
             "today_report_region": DashboardServices.today_report_region(),
             "time_in_day": DashboardServices.time_in_day(),
+            "name_husband": DashboardServices.get_name_husband(payload),
             "message": DashboardMessages.SUCCESS_GET_DASHBOARD_DATA
         })

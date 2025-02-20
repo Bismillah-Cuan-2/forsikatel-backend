@@ -1,4 +1,5 @@
 from app.connections.db import Base
+from zoneinfo import ZoneInfo
 from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, ForeignKey, Boolean, Float, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -11,8 +12,8 @@ class Data(Base):
     juz_read = Column(Integer, nullable=False)
     last_juz = Column(Integer, nullable=False, default=0)
     total_khatam = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=None, onupdate=datetime.now(timezone.utc), nullable=True)
+    created_at = Column(DateTime, default=datetime.now(ZoneInfo("Asia/Jakarta")), nullable=False)
+    updated_at = Column(DateTime, default=None, onupdate=datetime.now(ZoneInfo("Asia/Jakarta")), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
     
     users = relationship("Users", back_populates="data")
