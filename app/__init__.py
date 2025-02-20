@@ -22,7 +22,7 @@ def create_app(test_config=None, production_config=os.getenv("PRODUCTION_CONFIG"
         
     jwt.init_app(app)
     
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "localhost:5173"}})
     
     @app.route("/")
     def index():
