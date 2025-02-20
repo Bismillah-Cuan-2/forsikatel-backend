@@ -4,6 +4,11 @@ from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, ForeignKey, B
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 
+def get_current_time():
+    """Mengembalikan waktu saat ini dalam zona WIB"""
+    utc_now = datetime.now(ZoneInfo("UTC"))
+    return utc_now.astimezone(ZoneInfo("Asia/Jakarta"))
+
 class Data(Base):
     __tablename__ = "data"
     
@@ -12,8 +17,8 @@ class Data(Base):
     juz_read = Column(Integer, nullable=False)
     last_juz = Column(Integer, nullable=False, default=0)
     total_khatam = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.now(ZoneInfo("Asia/Jakarta")), nullable=False)
-    updated_at = Column(DateTime, default=None, onupdate=datetime.now(ZoneInfo("Asia/Jakarta")), nullable=True)
+    created_at = Column(DateTime, default=get_current_time, nullable=False)
+    updated_at = Column(DateTime, default=None, onupdate=get_current_time, nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
     
     users = relationship("Users", back_populates="data")
