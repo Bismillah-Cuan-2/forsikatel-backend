@@ -1,6 +1,6 @@
 hadist_seeds = [
     {
-        "hadist" : "Reza Oktovian, dikenal dengan mononim YB (sebelumnya dikenal sebagai RAP atau Rapyourbae; lahir 15 Oktober 1987) merupakan personalia YouTube, disjoki, penyanyi-penulis lagu, penyiar langsung, pengusaha, dan aktor berkebangsaan Indonesia.",
+        "hadist" : "Sesungguhnya di surga terdapat sebuah pintu yang disebut Ar-Rayyan. Pada hari kiamat, orang-orang yang berpuasa akan masuk melaluinya. Tidak ada seorang pun selain mereka yang memasukinya. Dikatakan: Di manakah orang-orang yang berpuasa? Maka mereka pun bangkit. Tidak ada seorang pun selain mereka yang memasukinya. Setelah mereka masuk, pintu itu ditutup sehingga tidak ada seorang pun yang dapat memasukinya. • (HR. Bukhari No. 1896 dan Muslim No. 1152)",
         "kultum" : "https://youtu.be/-cgLdZcJ1h4?si=0UwPR54idDEhOh4d",
         "day" : 1,
         "title" : "REZA ARAP BISA NYANYI ?",
@@ -140,7 +140,7 @@ hadist_seeds = [
         "channel" : "Saykocak"
     },
     {
-        "hadist" : "Rekayasa biomedis (bahasa Inggris: biomedical engineering/BME) adalah pengaplikasian teknik dan prinsip teknik dalam bidang medis, disebut juga teknik biomedis. Bidang ini menggabungkan kemampuan desain dan pemecahan masalah seorang insinyur dengan ilmu medis dan ilmu biologi di bidang kedokteran, seperti diagnosis, pengawasan, dan terapi.",
+        "hadist" : "Sesungguhnya di surga terdapat sebuah pintu yang disebut Ar-Rayyan. Pada hari kiamat, orang-orang yang berpuasa akan masuk melaluinya. Tidak ada seorang pun selain mereka yang memasukinya. Dikatakan: Di manakah orang-orang yang berpuasa? Maka mereka pun bangkit. Tidak ada seorang pun selain mereka yang memasukinya. Setelah mereka masuk, pintu itu ditutup sehingga tidak ada seorang pun yang dapat memasukinya. • (HR. Bukhari No. 1896 dan Muslim No. 1152)",
         "kultum" : "https://youtu.be/pNTmy3cX5jk?si=PfXkq45pr2gE4jHb",
         "day" : 21,
         "title" : "PAPI JADI KADEP LAGI ?",
