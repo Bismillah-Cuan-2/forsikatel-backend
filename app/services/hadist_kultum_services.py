@@ -19,9 +19,18 @@ class HadistKultumServices:
                 hadist_kultum = session.query(HadistKultum).filter(
                     HadistKultum.day == today, HadistKultum.is_deleted == False).first()
                 
+                hadist_kultum_dict = hadist_kultum.to_dict()
+
+                # Pisahkan hadist berdasarkan "•"
+                hadist, source = hadist_kultum_dict["hadist"].split("•", 1)
+                hadist_kultum_dict["hadist"] = {
+                    "hadist": hadist.strip(),
+                    "source": source.strip()
+                }
+
                 return jsonify({
                     "message": HadistKultumMessages.SUCCESS_GET_HADIST_KULTUM,
-                    "hadist_kultum": hadist_kultum.to_dict() if hadist_kultum else {}
+                    "hadist_kultum": hadist_kultum_dict
                 })
             except Exception as e:
                 return jsonify(Error.messages(e)), 500

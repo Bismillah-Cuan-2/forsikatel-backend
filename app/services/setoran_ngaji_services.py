@@ -146,8 +146,22 @@ class Dataservices:
             
     @staticmethod
     def all_storage(user_id):
+        # Ambil data tanpa jsonify
         riwayat = Dataservices.get_riwayat_setoran(user_id)
         total_progress = Dataservices.get_total_progress(user_id)
+
+        # Pastikan `riwayat` tidak berisi response JSON
+        if isinstance(riwayat, tuple):  
+            riwayat = []  # Jika terjadi error, set ke list kosong
+
+        # Pastikan `total_progress` adalah dictionary
+        if not isinstance(total_progress, dict):
+            total_progress = {
+                "total_juz": 0,
+                "last_juz": 0,
+                "total_khatam": 0
+            }
+
         return jsonify({
             "msg": SetoranNgajiMessages.SUCCESS_ADD_STORAGE,
             "history": riwayat,
