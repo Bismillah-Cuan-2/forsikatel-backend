@@ -58,9 +58,17 @@ class DashboardServices:
                 wib_now = utc_now.astimezone(ZoneInfo("Asia/Jakarta"))
                 today = wib_now.day
                 hadits = session.query(HadistKultum).filter(
-                    HadistKultum.day == today, HadistKultum.is_deleted == False).first()
-                
-                return hadits.hadist if hadits else None
+                    HadistKultum.day == today, HadistKultum.is_deleted == False
+                ).first()
+
+                if hadits:
+                    bagian_hadits = hadits.hadist.split("•", 1)  # Pisah berdasarkan "•" sekali
+                    return {
+                        "hadits": bagian_hadits[0].strip(),
+                        "source": bagian_hadits[1].strip() if len(bagian_hadits) > 1 else ""
+                    }
+
+                return None
             except Exception as e:
                 session.rollback()
                 return Error.messages(e)
