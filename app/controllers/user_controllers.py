@@ -1,10 +1,13 @@
 from flask import request, jsonify
+import ast
+import json
 from app.utils.validators.login_validator import LoginValidator
 from app.utils.validators.register_validator import RegisterValidator
+from app.utils.auth.middleware import user_required
 from pydantic import ValidationError
 from app.services.user_services import UsersService
 from app.constant.messages.error import Error
-from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
+from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, get_jwt_identity
 
 class UsersController:
     
@@ -51,3 +54,12 @@ class UsersController:
         
         return response
     
+    @staticmethod
+    @user_required()
+    def authenticate_user():
+        payload = json.dumps(ast.literal_eval(get_jwt_identity()))
+        payload = json.loads(payload)
+        
+        response = UsersService.authenticate_user(payload)
+        
+        return response

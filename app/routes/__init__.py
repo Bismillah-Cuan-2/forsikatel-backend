@@ -14,6 +14,7 @@ users = Blueprint("users", __name__)
 users.add_url_rule("/register", view_func=UsersController.register_user, methods=["POST"])
 users.add_url_rule("/login", view_func=UsersController.login_user, methods=["POST"])
 users.add_url_rule("/delete", view_func=UsersController.delete_user, methods=["DELETE"])
+users.add_url_rule("/authenticate", view_func=UsersController.authenticate_user, methods=["GET"])
 
 hadist_kultum = Blueprint("hadist_kultum", __name__)
 hadist_kultum.add_url_rule("/", view_func=HadistKultumControllers.get_daily_hadist, methods=["GET"])

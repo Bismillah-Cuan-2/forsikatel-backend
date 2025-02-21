@@ -87,3 +87,17 @@ class UsersService:
                 "msg": UserMessages.SUCCESS_DELETE_USER
             }), 200
             
+    @staticmethod
+    def authenticate_user(payload):
+        try:
+            with Session() as session:
+                user = session.query(Users).filter_by(id=payload["user_id"]).first()
+                if user is None:
+                    return jsonify({"msg": UserMessages.NAME_NOT_EXIST}), 404
+                
+                return jsonify({
+                    "msg": UserMessages.SUCCESS_AUTHENTICATE_USER,
+                    "user_info": user.to_dict()
+                }), 200
+        except Exception as e:
+            return jsonify(Error.messages(e)), 400

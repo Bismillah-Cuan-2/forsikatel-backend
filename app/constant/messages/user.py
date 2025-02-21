@@ -7,3 +7,4 @@ class UserMessages:
     SUCCESS_USER_REGISTER = "success register user"
     SUCCESS_CHANGE_PASSWORD = "success change password"
     SUCCESS_DELETE_USER = "success delete user"
+    SUCCESS_AUTHENTICATE_USER = "success authenticate user"
