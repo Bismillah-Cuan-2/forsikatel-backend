@@ -30,16 +30,19 @@ class DashboardServices:
         with Session() as session:
             try:
                 result = (
-                    session.query(func.date(Data.created_at))
+                    session.query(Data.created_at)
                     .filter(
                         Data.user_id == payload["user_id"],
                         Data.is_deleted == False
                     )
-                    .distinct()
                     .all()
                 )
 
-                hari_terisi = {datetime.strptime(str(row[0]), "%Y-%m-%d").isoweekday() for row in result}
+                # Konversi created_at ke WIB sebelum mengambil hari dalam seminggu
+                hari_terisi = {
+                    data.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Asia/Jakarta")).isoweekday()
+                    for data in result
+                }
 
                 nama_hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
                 kalender = {nama_hari[i]: (i + 1 in hari_terisi) for i in range(7)}
@@ -49,6 +52,7 @@ class DashboardServices:
             except Exception as e:
                 session.rollback()
                 return Error.messages(e)
+
             
     @staticmethod
     def hadits():
@@ -96,6 +100,12 @@ class DashboardServices:
                 for activity in latest_activities:
                     created_at, name, regional, last_juz, juz_read = activity
                     
+                    # Konversi ke WIB sebelum di-format
+                    created_at_wib = created_at.astimezone(ZoneInfo("Asia/Jakarta"))
+                    
+                    # Ambil hanya kata pertama dari setiap nama
+                    name = " - ".join([n.split()[0] for n in name.split(" - ")])
+                    
                     # Hitung juz yang dibaca
                     start_juz = max(1, last_juz - juz_read + 1)  # Pastikan tidak kurang dari 1
                     end_juz = last_juz
@@ -105,7 +115,7 @@ class DashboardServices:
                         "region": regional,
                         "name": name,
                         "juz_read": juz_range,
-                        "entry_time": created_at.isoformat()
+                        "entry_time": created_at_wib.isoformat()
                     })
                 
                 return result

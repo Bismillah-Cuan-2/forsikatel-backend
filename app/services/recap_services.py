@@ -2,6 +2,7 @@ from flask import jsonify
 from app.connections.db import Session
 from sqlalchemy import func, cast, Date, exists, case
 from datetime import datetime
+import pytz
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from app.models.data_model import Data
@@ -42,17 +43,33 @@ class RecapServices:
                     .all()
                 )
 
-                # Akumulasi total juz berdasarkan region
+                # Akumulasi total khatam berdasarkan region
                 for user_id, total_khatam in user_khatam_totals:
                     if user_id in user_region_map:
                         region_totals[user_region_map[user_id]] += total_khatam or 0  # Hindari None
 
-                # Mengembalikan semua region beserta total juz yang dihitung hanya dari data terbaru per user
-                return [{"region": region, "total_khatam": total} for region, total in region_totals.items()]
+                # Urutan region yang diinginkan
+                region_order = {
+                    "ho": 0,
+                    "r1_sumatera": 1,
+                    "r2_jakarta": 2,
+                    "r3_jabar": 3,
+                    "r4_jateng_jogja": 4,
+                    "r5_jatim_bali_nt": 5,
+                    "r6_kalimantan": 6
+                }
+
+                # Urutkan berdasarkan region_order, region yang tidak ada dalam daftar diletakkan di akhir
+                sorted_results = sorted(
+                    region_totals.items(),
+                    key=lambda x: region_order.get(x[0], 99)  # Region yang tidak dikenal diberi nilai 99 (diurutkan terakhir)
+                )
+
+                return [{"region": region, "total_khatam": total} for region, total in sorted_results]
         except Exception as e:
             session.rollback()
             return Error.messages(e)
-        
+
     @staticmethod
     def total_juz():
         try:
@@ -77,8 +94,24 @@ class RecapServices:
                     if user_id in user_region_map:
                         region_totals[user_region_map[user_id]] += total_juz
 
-                # Mengembalikan semua region beserta total juz yang dibaca hari ini
-                return [{"region": region, "total_juz": total} for region, total in region_totals.items()]
+                # Urutan region yang diinginkan
+                region_order = {
+                    "ho": 0,
+                    "r1_sumatera": 1,
+                    "r2_jakarta": 2,
+                    "r3_jabar": 3,
+                    "r4_jateng_jogja": 4,
+                    "r5_jatim_bali_nt": 5,
+                    "r6_kalimantan": 6
+                }
+
+                # Urutkan berdasarkan region_order, region yang tidak ada dalam daftar diletakkan di akhir
+                sorted_results = sorted(
+                    region_totals.items(),
+                    key=lambda x: region_order.get(x[0], 99)  # Region yang tidak dikenal diberi nilai 99 (diurutkan terakhir)
+                )
+
+                return [{"region": region, "total_juz": total} for region, total in sorted_results]
         except Exception as e:
             session.rollback()
             return Error.messages(e)
@@ -86,7 +119,7 @@ class RecapServices:
     @staticmethod
     def user_recap():
         try:
-            today = datetime.now()
+            today = datetime.now(pytz.utc).astimezone(pytz.timezone("Asia/Jakarta"))  # Konversi ke WIB
 
             with Session() as session:
                 user_datas = session.query(
@@ -114,13 +147,17 @@ class RecapServices:
 
                 result = []
                 for user_id, name_husband, regional, total_juz in user_datas:
-                    latest_entry = session.query(Data.last_juz, Data.total_khatam) \
+                    latest_entry = session.query(Data.last_juz, Data.total_khatam, Data.created_at) \
                         .filter(Data.user_id == user_id, Data.is_deleted == False) \
                         .order_by(Data.created_at.desc()) \
                         .first()
 
                     last_juz = latest_entry.last_juz if latest_entry else None
                     total_khatam = latest_entry.total_khatam if latest_entry else None
+
+                    # Konversi created_at ke WIB jika ada data
+                    last_created_at = (latest_entry.created_at.astimezone(pytz.timezone("Asia/Jakarta")) 
+                                    if latest_entry and latest_entry.created_at else None)
 
                     last_5days = []
                     for i in range(5, 0, -1):  # 5 hari lalu di kiri, terbaru di kanan
@@ -133,13 +170,29 @@ class RecapServices:
                             ).first()
                         last_5days.append(bool(has_entry))
 
+                    # Pisahkan nama berdasarkan " - "
+                    if " - " in name_husband:
+                        left_name, right_name = name_husband.split(" - ", 1)
+                    else:
+                        left_name, right_name = name_husband, ""
+
+                    # Ambil dua kata pertama dari kiri dan kanan
+                    left_parts = left_name.split()
+                    right_parts = right_name.split()
+
+                    formatted_left = " ".join(left_parts[:2]) if len(left_parts) >= 2 else left_name
+                    formatted_right = " ".join(right_parts[:2]) if len(right_parts) >= 2 else right_name
+
+                    formatted_name = f"{formatted_left} - {formatted_right}"
+
                     result.append({
                         "user_id": user_id,
-                        "name_husband": name_husband,
+                        "name_husband": formatted_name.strip(),
                         "regional": regional,
                         "total_juz": total_juz,
                         "last_juz": last_juz,
                         "total_khatam": total_khatam,
+                        "last_created_at": last_created_at,  # Waktu terakhir dalam WIB
                         "last_5days": last_5days
                     })
 

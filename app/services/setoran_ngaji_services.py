@@ -92,9 +92,9 @@ class Dataservices:
     def get_progress_chart(user_id):
         with Session() as session:
             try:
-                today = datetime.today().date()
+                today = datetime.now(ZoneInfo("Asia/Jakarta")).date()
                 last_week = today - timedelta(days=7)
-                
+
                 days_translation = {
                     "Monday": "Senin",
                     "Tuesday": "Selasa",
@@ -104,44 +104,44 @@ class Dataservices:
                     "Saturday": "Sabtu",
                     "Sunday": "Minggu"
                 }
-                
+
                 week_data = []
                 ordered_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
-                
+
                 for day_name in ordered_days:
                     day = today - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
                     prev_week_day = last_week - timedelta(days=today.weekday() - list(days_translation.values()).index(day_name))
-                    
-                    day_data = session.query(
-                        func.sum(Data.juz_read)
-                    ).filter(
+
+                    # Ambil semua data dalam rentang waktu tertentu, lalu konversi zona waktu secara manual
+                    query_results = session.query(Data.created_at, Data.juz_read).filter(
                         Data.user_id == user_id,
-                        func.date(Data.created_at) == day,
                         Data.is_deleted == False
-                    ).scalar() or 0
-                    
-                    prev_week_data = session.query(
-                        func.sum(Data.juz_read)
-                    ).filter(
-                        Data.user_id == user_id,
-                        func.date(Data.created_at) == prev_week_day,
-                        Data.is_deleted == False
-                    ).scalar() or 0
-                    
+                    ).all()
+
+                    # Konversi created_at ke WIB
+                    filtered_today = sum(
+                        data.juz_read for data in query_results
+                        if data.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Asia/Jakarta")).date() == day
+                    )
+
+                    filtered_prev_week = sum(
+                        data.juz_read for data in query_results
+                        if data.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Asia/Jakarta")).date() == prev_week_day
+                    )
+
                     week_data.append({
                         "day": day_name,
-                        "today": day_data,
-                        "prev_week": prev_week_data
+                        "today": filtered_today,
+                        "prev_week": filtered_prev_week
                     })
-                
+
                 return jsonify({
                     "msg": SetoranNgajiMessages.SUCCESS_PROGRESS_CHART,
                     "data": week_data
                 }), 200
-
             except Exception as e:
                 session.rollback()
-                return jsonify(Error.messages(e)), 400
+                return Error.messages(e), 400
 
             
     @staticmethod

@@ -9,8 +9,6 @@ class HadistKultumControllers:
     def get_daily_hadist():
         if request.method == "GET":
             response = HadistKultumServices.get_daily_hadist()
-        else : 
-            jsonify(AuthMessages.USER_NOT_AUTHORIZED), 403
         return response
     
     @staticmethod

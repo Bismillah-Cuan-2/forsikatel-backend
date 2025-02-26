@@ -33,7 +33,7 @@ class HadistKultumServices:
                     "hadist_kultum": hadist_kultum_dict
                 })
             except Exception as e:
-                return jsonify(Error.messages(e)), 500
+                return jsonify(Error.messages(e)), 400
     
     @staticmethod
     def load_hadist_kultum_from_excel(data):
