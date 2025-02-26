@@ -1,9 +1,8 @@
 from flask import jsonify
 from app.connections.db import Session
 from sqlalchemy import func, cast, Date
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
 from app.models.data_model import Data
 from app.models.users_model import Users
 from app.constant.messages.error import Error
@@ -11,11 +10,11 @@ from app.constant.messages.progress import ProgressMessages
 
 class ProgressServices:
     @staticmethod
-    def total_juz_region():
+    def total_progress_region():
         today = datetime.now(timezone.utc).date()
         try:
             with Session() as session:
-                region_totals = defaultdict(int)
+                region_totals = defaultdict(lambda: {"jumlah_juz": 0, "jumlah_setoran": 0, "jumlah_user_per_region": 0})
 
                 # Ambil data user_id dan region masing-masing
                 user_regions = session.query(Users.id, Users.regional).all()
@@ -29,26 +28,16 @@ class ProgressServices:
                     .filter(Data.is_deleted == False, cast(Data.created_at, Date) == today) \
                     .group_by(Data.user_id) \
                     .all()
-
+                
                 # Akumulasi total juz berdasarkan region
                 for user_id, total_juz in user_juz_totals:
                     if user_id in user_region_map:
-                        region_totals[user_region_map[user_id]] += total_juz
-
-                # Mengembalikan semua region beserta total juz yang dibaca hari ini
-                return [{"region": region, "total_juz": total} for region, total in region_totals.items()]
-        except Exception as e:
-            session.rollback()
-            return Error.messages(e)
-        
-    @staticmethod
-    def total_setoran_region():
-        try:
-            today = datetime.now(timezone.utc).date()
-            with Session() as session:
+                        region_totals[user_region_map[user_id]]["jumlah_juz"] += total_juz
+                
+                # Hitung total pengguna yang setor per region
                 result = (
                     session.query(
-                        Users.regional, func.count(func.distinct(Data.user_id)).label("total_users_setor")
+                        Users.regional, func.count(func.distinct(Data.user_id)).label("jumlah_setoran")
                     )
                     .join(Users, Users.id == Data.user_id)
                     .filter(cast(Data.created_at, Date) == today)
@@ -56,15 +45,22 @@ class ProgressServices:
                     .all()
                 )
                 
+                for region, total_users_setor in result:
+                    region_totals[region]["jumlah_setoran"] = total_users_setor
+                
                 # Hitung total pengguna per region
                 total_users_per_region = dict(
                     session.query(Users.regional, func.count(Users.id)).group_by(Users.regional).all()
                 )
-            return [{"region": region, "total_users_setor": total, "total_users_region": total_users_per_region.get(region, 0)} for region, total in result]
+                
+                for region, total_users in total_users_per_region.items():
+                    region_totals[region]["jumlah_user_per_region"] = total_users
+                
+                return [{"region": region, **data} for region, data in region_totals.items()]
         except Exception as e:
             session.rollback()
             return Error.messages(e)
-        
+    
     @staticmethod
     def all_latest_activity():
         with Session() as session:
@@ -103,12 +99,11 @@ class ProgressServices:
             except Exception as e:
                 session.rollback()
                 return Error.messages(e)
-            
+    
     @staticmethod
     def progress_data():
         return jsonify({
             "all_latest_activity": ProgressServices.all_latest_activity(),
-            "total_setoran_region": ProgressServices.total_setoran_region(),
-            "total_juz_region": ProgressServices.total_juz_region(),
+            "total_progress_region": ProgressServices.total_progress_region(),
             "message": ProgressMessages.SUCCESS_GET_PROGRESS_DATA
         })
