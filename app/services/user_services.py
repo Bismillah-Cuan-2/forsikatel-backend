@@ -3,6 +3,7 @@ from sqlalchemy import func
 from app.connections.db import Session
 from app.utils.functions.search_normalizer import normalize_data
 from app.models.users_model import Users
+from app.models.data_model import Data
 from app.constant.messages.user import UserMessages
 from app.constant.messages.error import Error
 
@@ -86,6 +87,45 @@ class UsersService:
             return jsonify({
                 "msg": UserMessages.SUCCESS_DELETE_USER
             }), 200
+            
+    @staticmethod
+    def permanent_delete_user(data):
+        
+        try:
+            with Session() as session:
+                name_to_search = normalize_data(data["name_husband"])
+                
+                # Cari user yang ingin dihapus
+                user_profile = session.query(Users).filter(
+                    func.lower(func.replace(Users.name_husband, " ", "")) == name_to_search,
+                    Users.id == data["user_id"]
+                ).first()
+                
+                if not user_profile:
+                    return jsonify({"msg": UserMessages.NAME_NOT_EXIST}), 404
+                
+                deleted_user_data = {
+                    "user_id": user_profile.id,
+                    "name_husband": user_profile.name_husband,
+                    "regional": user_profile.regional,
+                    "created_at": user_profile.created_at.strftime("%Y-%m-%d %H:%M:%S") if user_profile.created_at else None,
+                }
+
+                # Hapus semua data terkait di tabel Data
+                session.query(Data).filter(Data.user_id == user_profile.id).delete()
+
+                # Hapus user secara permanen
+                session.delete(user_profile)
+                session.commit()
+                
+                return jsonify({
+                    "msg": UserMessages.SUCCESS_DELETE_USER,
+                    "deleted_user": deleted_user_data
+                }), 200
+        except Exception as e:
+            session.rollback()
+            return jsonify(Error.messages(e)), 400
+            
             
     @staticmethod
     def authenticate_user(payload):

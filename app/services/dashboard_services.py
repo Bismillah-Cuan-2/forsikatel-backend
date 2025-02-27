@@ -3,6 +3,7 @@ from collections import defaultdict
 from sqlalchemy import func, cast, Date
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+import pytz
 from app.connections.db import Session
 from app.models.data_model import Data
 from app.models.users_model import Users
@@ -45,7 +46,15 @@ class DashboardServices:
                 }
 
                 nama_hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
-                kalender = {nama_hari[i]: (i + 1 in hari_terisi) for i in range(7)}
+
+                # Menentukan hari saat ini dalam minggu (1 = Senin, ..., 7 = Minggu)
+                hari_sekarang = datetime.now(ZoneInfo("Asia/Jakarta")).isoweekday()
+
+                # Membuat kalender yang mencakup semua hari
+                kalender = {
+                    nama_hari[i]: (i + 1 in hari_terisi) if i + 1 <= hari_sekarang else False
+                    for i in range(7)
+                }
 
                 return kalender
 
@@ -149,28 +158,79 @@ class DashboardServices:
                 return Error.messages(e)
             
     @staticmethod
-    def today_report_region():
+    def today_report_region(payload):
         try:
-            today = datetime.now(timezone.utc).date()
+            today = datetime.now(pytz.utc).astimezone(pytz.timezone("Asia/Jakarta"))
             with Session() as session:
+                # Ambil semua region yang valid
+                all_regions = [
+                    'ho', 'r1_sumatera', 'r2_jakarta', 'r3_jabar',
+                    'r4_jateng_jogja', 'r5_jatim_bali_nt', 'r6_kalimantan'
+                ]
+                
+                # Ambil data setor hari ini (sudah convert ke Waktu Jakarta)
                 result = (
                     session.query(
-                        Users.regional, func.count(func.distinct(Data.user_id)).label("total_users_setor")
+                        Users.regional, 
+                        func.count(func.distinct(Data.user_id)).label("total_users_setor")
                     )
                     .join(Users, Users.id == Data.user_id)
-                    .filter(cast(Data.created_at, Date) == today)
+                    .filter(
+                        cast(
+                            func.convert_tz(Data.created_at, 'UTC', 'Asia/Jakarta'),
+                            Date
+                        ) == today.date()
+                    )
                     .group_by(Users.regional)
                     .all()
                 )
-                
-                # Hitung total pengguna per region
+
+                # Hitung total users per region (semua region harus ada walaupun 0)
                 total_users_per_region = dict(
-                    session.query(Users.regional, func.count(Users.id)).group_by(Users.regional).all()
+                    session.query(Users.regional, func.count(Users.id))
+                    .group_by(Users.regional)
+                    .all()
                 )
-            return [{"region": region, "total_users_setor": total, "total_users_region": total_users_per_region.get(region, 0)} for region, total in result]
+
+                # Buat mapping region yang sudah ada datanya
+                setor_data = {region: total for region, total in result}
+
+                # Progress data berisi semua region, meski total_users_setor = 0
+                progress_data = []
+                for region in all_regions:
+                    progress_data.append({
+                        "region": region,
+                        "total_users_setor": setor_data.get(region, 0),
+                        "total_users_region": total_users_per_region.get(region, 0)
+                    })
+
+                # Hitung persentase per region
+                region_percentages = []
+                for data in progress_data:
+                    if data["total_users_region"] > 0:
+                        percentage = (data["total_users_setor"] / data["total_users_region"]) * 100
+                        region_percentages.append((data["region"], percentage))
+
+                # Cari region dengan persentase terbesar
+                max_percentage = 0
+                stars = []
+                for region, percentage in region_percentages:
+                    if percentage > max_percentage:
+                        max_percentage = percentage
+                        stars = [region]
+                    elif percentage == max_percentage:
+                        stars.append(region)
+
+                # Response lengkap
+                return {
+                    "user's region": payload["regional"],
+                    "progress_data": progress_data,
+                    "stars": stars
+                }
+        
         except Exception as e:
             session.rollback()
-            return Error.messages(e)
+            return jsonify(Error.messages(e)), 400
         
     @staticmethod
     def time_in_day():
@@ -219,7 +279,7 @@ class DashboardServices:
             "hadits": DashboardServices.hadits(),
             "latest_activity": DashboardServices.latest_activity(),
             "top_region": DashboardServices.top_region(),
-            "today_report_region": DashboardServices.today_report_region(),
+            "today_report_region": DashboardServices.today_report_region(payload),
             "time_in_day": DashboardServices.time_in_day(),
             "name_husband": DashboardServices.get_name_husband(payload),
             "message": DashboardMessages.SUCCESS_GET_DASHBOARD_DATA

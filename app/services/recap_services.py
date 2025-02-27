@@ -160,12 +160,15 @@ class RecapServices:
                                     if latest_entry and latest_entry.created_at else None)
 
                     last_5days = []
+                    wib = pytz.timezone('Asia/Jakarta')
+                    
                     for i in range(5, 0, -1):  # 5 hari lalu di kiri, terbaru di kanan
                         check_date = today - timedelta(days=i)
+                        check_date_wib = check_date.astimezone(wib).date()
                         has_entry = session.query(Data.id) \
                             .filter(
                                 Data.user_id == user_id,
-                                func.date(Data.created_at) == check_date.date(),
+                                func.date(func.convert_tz(Data.created_at, 'UTC', 'Asia/Jakarta')) == check_date_wib,
                                 Data.is_deleted == False
                             ).first()
                         last_5days.append(bool(has_entry))
